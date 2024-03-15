@@ -1,0 +1,17 @@
+<%- include('./partials/header.ejs'); %>
+    <form action='/processForm' method='post'>
+        Search for a user: <input name='name' type='text' placeholder='Name'>
+        <button>Submit</button>
+    </form>
+   <% if (user && user.username) { %>
+        <div>
+            <p><strong>User Found</strong>: <%= user.username %></p>
+            <ul>
+                <li>...</li>
+                <li>...</li>
+            </ul>
+        </div>
+   <% } else { %>
+        <p><strong>User Not Found</strong></p>
+    <% } %>
+<%- include('./partials/footer.ejs'); %>

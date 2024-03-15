@@ -1,0 +1,9 @@
+<%- include('./partials/header.ejs'); %>
+    create user
+    <form action='/submitUser' method='post'>
+    <div><input name='username' type='text' placeholder='username'></div>
+    <div><input name='email' type='text' placeholder='email'></div>
+    <div><input name='password' type='password' placeholder='password'></div>
+    <button>Submit</button>
+    </form>
+<%- include('./partials/footer.ejs'); %>

@@ -1,0 +1,78 @@
+<%- include('./partials/header.ejs'); %>
+<div class="d-flex justify-content-between">
+  <div>
+    <!-- <code>app.get('/protectedRoute') @protectedRoute.ejs</code> -->
+  </div>
+  <div>
+  </div>
+  <div>
+    <% if (isAdmin) { %>
+      <code>Admin page available:</code><input type="button" value="Admin Page" onclick="window.location.href='/admin'" /> 
+    <% } %>
+  </div>
+</div>
+<h1>Members Page</h1>
+<button class="btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button>
+<p>Welcome, <strong><%= username %></strong>!</p>
+<div class="container text-center">
+  <div class="row gx-3">
+    <div class="col-sm border">
+      <div><img src="/<%= imagea %>" alt="random welcome image" class="img-fluid" /></div>
+    </div>
+    <div class="col-sm border">
+      <div><img src="/<%= imageb %>" alt="random welcome image" class="img-fluid" /></div>
+    </div>
+    <div class="col-sm border">
+      <div><img src="/<%= imagec %>" alt="random welcome image" class="img-fluid" /></div>
+    </div>
+  </div>
+</div>
+<!-- Chat Rooms -->
+<div class="container text-center my-4">
+  <div class="row gx-3">
+    <div class="col-sm border">
+      <div><h2>Chat Rooms</h2></div>
+    </div>
+  </div>
+  <!-- <div class="row gx-3">
+    <div class="col-sm border">
+      <div><h3>Your Chats</h3></div>
+    </div>
+  </div> -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Group</th>
+        <th>Last Message</th>
+        <th>Unread Messages</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>user</td>
+        <td>type</td>
+        <td>
+          <div class="d-flex">
+            <form action="/promoteUser" method="POST">
+              <input type="hidden" name="username" value="user" />
+              <button type="submit" class="btn btn-success btn-sm">
+                Promote
+              </button>
+            </form>
+            <form action="/demoteUser" method="POST">
+              <input type="hidden" name="username" value="user" />
+              <button type="submit" class="btn btn-danger btn-sm">Demote</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+<!-- button to create new group -->
+  <button class="btn btn-outline-dark" value="newGroup" onclick="window.location.href='/createGroup'">New Group +</button>
+</div>
+<br />
+<br />
+
+<%- include('./partials/footer.ejs'); %>
