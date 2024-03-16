@@ -1,7 +1,7 @@
 const database = require('../databaseConnection.js');
 
 // Creates a new chatroom
-async function createGroup(postData) {
+async function createUser(postData) {
 	let createUserSQL = `
 		INSERT INTO user
 		(email, username, password)
@@ -27,7 +27,7 @@ async function createGroup(postData) {
 	}
 }
 // Gets all chatrooms
-async function getGroups(postData) {
+async function getUsers(postData) {
 	let getUsersSQL = `
 		SELECT username, password
 		FROM user;
@@ -47,7 +47,7 @@ async function getGroups(postData) {
 }
 
 // Gets a specific chatroom
-async function getGroup(postData) {
+async function getUser(postData) {
 	let getUserSQL = `
 		SELECT user_id, username, password, user_type_id
 		FROM user
@@ -74,4 +74,4 @@ async function getGroup(postData) {
 		return false;
 	}
 }
-module.exports = {createGroup, getGroups, getGroup};
+module.exports = {createUser, getUsers, getUser};

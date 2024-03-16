@@ -28,17 +28,12 @@
   </div>
 </div>
 <!-- Chat Rooms -->
-<div class="container text-center my-4">
+<div class="container my-4">
   <div class="row gx-3">
     <div class="col-sm border">
       <div><h2>Chat Rooms</h2></div>
     </div>
   </div>
-  <!-- <div class="row gx-3">
-    <div class="col-sm border">
-      <div><h3>Your Chats</h3></div>
-    </div>
-  </div> -->
   <table class="table">
     <thead>
       <tr>
@@ -48,29 +43,27 @@
       </tr>
     </thead>
     <tbody>
+      <% rooms.forEach(function(room){ %>
       <tr>
-        <td>user</td>
-        <td>type</td>
+        <td><%- room.name %></td>
+        <td><%- room.sent_datetime %></td>
+        <td><%- mostRecentMessages %></td>
+        
+  
+      </tr>
+    <% }); %>
+    </tbody>
+    <tfoot>
+      <tr class="align-left">
         <td>
-          <div class="d-flex">
-            <form action="/promoteUser" method="POST">
-              <input type="hidden" name="username" value="user" />
-              <button type="submit" class="btn btn-success btn-sm">
-                Promote
-              </button>
-            </form>
-            <form action="/demoteUser" method="POST">
-              <input type="hidden" name="username" value="user" />
-              <button type="submit" class="btn btn-danger btn-sm">Demote</button>
-            </form>
-          </div>
+          <!-- <button class="btn btn-outline-dark" value="newGroup" onclick="window.location.href='/createGroup'">New Group +</button> -->
+          Number of Chat Rooms: <%= rooms.length %>
         </td>
       </tr>
-
-    </tbody>
+    </tfoot>
   </table>
 <!-- button to create new group -->
-  <button class="btn btn-outline-dark" value="newGroup" onclick="window.location.href='/createGroup'">New Group +</button>
+  <div class="text-left"><button class="btn btn-outline-dark text-left" value="newGroup" onclick="window.location.href='/createGroup'">New Group +</button></div>
 </div>
 <br />
 <br />

@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const database = require('./databaseConnection.js');
 const db_utils = require('./database/db_utils.js');
 const db_users = require('./database/users.js');
+const db_chats = require('./database/chats.js');
 const success = db_utils.printMySQLVersion();
 const fs = require('fs');
 const app = express();
@@ -146,7 +147,7 @@ app.post('/loggingin', async (req,res) => {
             if (bcrypt.compareSync(password, results[0].password)) {
                 req.session.authenticated = true;
                 req.session.username = username;
-                req.session.user_type = results[0].type;
+                // req.session.user_type = results[0].type;
                 req.session.cookie.maxAge = expireTime;
                 res.redirect('/loggedIn');
                 return;
@@ -204,16 +205,27 @@ function sessionValidation(req, res, next) {
 
 app.use('/loggedin', sessionValidation);
 app.use('/loggedin/admin', adminAuthorization);
-app.get('/loggedin', (req,res) => {
+app.get('/loggedin', async (req,res) => {
     console.log("app.get(\'\/protectedRoute\'): Current session cookie-id:", req.cookies);
     const randomImageNumber = Math.floor(Math.random() * 3) + 1;
     const imageName = `00${randomImageNumber}.gif`;
+    var username = req.session.username;
+    var rooms = await db_chats.getRooms({ username: username}); // each index is a row in the table
+    var mostRecentMessages = [];
+    for (var i = 0; i < rooms.length; i++) {
+        var room = rooms[i];
+        var mostRecentMessage = await db_chats.getMostRecentMessage({ username: username, room_id: room.room_id });
+        mostRecentMessages.push(mostRecentMessage);
+    }
+
     res.render('protectedRoute.ejs', {
         "username": req.session.username,
         "imagea": `00${Math.floor(Math.random() * 3) + 1}.gif`,
         "imageb": `00${Math.floor(Math.random() * 3) + 1}.gif`,
         "imagec": `00${Math.floor(Math.random() * 3) + 1}.gif`,
-        "isAdmin": req.session.loggedType == 'administrator'
+        "isAdmin": req.session.loggedType == 'administrator',
+        "rooms": rooms,
+        "mostRecentMessages": mostRecentMessages
     })
 });
 
