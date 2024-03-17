@@ -11,6 +11,7 @@ const database = require('./databaseConnection.js');
 const db_utils = require('./database/db_utils.js');
 const db_users = require('./database/users.js');
 const db_chats = require('./database/chats.js');
+const db_messages = require('./database/messages.js');
 const success = db_utils.printMySQLVersion();
 const fs = require('fs');
 const app = express();
@@ -241,6 +242,7 @@ app.get('/room/:room_id', async (req,res) => {
     console.log("");
     var username = req.session.username;
     var room = await db_chats.getRoom({ room_id: room_id, username: username});
+    var messages = await db_messages.getMessagesForRoom({ room_id: room_id, username: username});
     console.log("`app.get(\'\/room\/:id\')`: room results (after awaiting DB): ")
     console.log(room);
     // var messages = await db_chats.getMessages({ room_id: room_id, username: username});
@@ -250,7 +252,8 @@ app.get('/room/:room_id', async (req,res) => {
     res.render('protectedRouteRoom.ejs', {
         "username": req.session.username,
         "room": room,
-        "session_room_id": req.session_room_id
+        "session_room_id": req.session_room_id,
+        "messages": messages
     })
 });
 

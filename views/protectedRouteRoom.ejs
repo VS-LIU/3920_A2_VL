@@ -1,4 +1,5 @@
 <%- include('./partials/header.ejs'); %>
+<hr>
   <div>
     <!-- <code>app.get('/protectedRoute') @protectedRoute.ejs</code> -->
   </div>
@@ -11,17 +12,23 @@
 <!-- Chat Rooms -->
 <div class="container my-4">
 
-    <div class="text-center col-sm border">
-      <div><h2><%= chat.name %> Chat Room</h2>[room id: <%= chat.room_id %>]</div>
+    <div class="text-center col-sm border mb-5">
+      <div><h2>"<%= chat.name %>"</h2>[chat room id: <%= chat.room_id %>]</div>
     </div>
 
  
+    <% messages.forEach(function(message){ %>
+      
+      <div>
+        <div class="ms-1"><strong><%= message.username %></strong></div>
+      <div class="col-sm-3 border p-2">
+        <div><%= message.text %></div>
+      </div>
+      <div class="col-sm-3 text-end"><small><em><%= message.sent_datetime %></em></small></div>
+    </div>
+      <br>
         
-   
-          <p>User: <%= chat.username %></p>
-          <p>Message: <%= chat.text %></p>
-          <p>Sent Date/Time: <%= chat.sent_datetime %></p>
-        
+    <% }); %>
   <hr>
   <form action="/postMessage" method="post">
     <label for="message">Enter your message:</label><br>
@@ -30,4 +37,7 @@
   </form>
 </div>
 <% }); %>
+<br>
+<br>
+<hr>
 <%- include('./partials/footer.ejs'); %>
