@@ -1,0 +1,33 @@
+<%- include('./partials/header.ejs'); %>
+  <div>
+    <!-- <code>app.get('/protectedRoute') @protectedRoute.ejs</code> -->
+  </div>
+  <div>
+  </div>
+  <div>
+<% room.forEach(function(chat){ %>
+<p>Welcome, <strong><%= username %></strong>!<button class=" ms-3 btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button></p>
+<!-- <button class="btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button> -->
+<!-- Chat Rooms -->
+<div class="container my-4">
+
+    <div class="text-center col-sm border">
+      <div><h2><%= chat.name %> Chat Room</h2>[room id: <%= chat.room_id %>]</div>
+    </div>
+
+ 
+        
+   
+          <p>User: <%= chat.username %></p>
+          <p>Message: <%= chat.text %></p>
+          <p>Sent Date/Time: <%= chat.sent_datetime %></p>
+        
+  <hr>
+  <form action="/postMessage" method="post">
+    <label for="message">Enter your message:</label><br>
+    <input type="text" id="message" name="message">
+    <button type="submit">Send</button>
+  </form>
+</div>
+<% }); %>
+<%- include('./partials/footer.ejs'); %>

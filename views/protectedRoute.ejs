@@ -11,9 +11,11 @@
     <% } %>
   </div>
 </div>
-<h1>Members Page</h1>
-<button class="btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button>
-<p>Welcome, <strong><%= username %></strong>!</p>
+<div class="text-center">
+  <h1>Members Page</h1>
+</div>
+<p>Welcome, <strong><%= username %></strong>!<button class=" ms-3 btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button></p>
+<!-- <button class="btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button> -->
 <div class="container text-center">
   <div class="row gx-3">
     <div class="col-sm border">
@@ -45,9 +47,9 @@
     <tbody>
       <% rooms.forEach(function(room){ %>
       <tr>
-        <td><%- room.name %></td>
+        <td><a href="/room/<%- room.room_id %>"><%- room.name %></a></td>
         <td><%- room.sent_datetime %></td>
-        <td><%- mostRecentMessages %></td>
+        <td><%- room.number_of_messages_behind %></td>
         
   
       </tr>

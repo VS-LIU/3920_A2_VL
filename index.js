@@ -187,6 +187,7 @@ function adminAuthorization(req, res, next) {
 
 function isValidSession(req) {
 	if (req.session.authenticated) {
+        console.log("function isValidSession: req.session.authenticated: ", req.session.authenticated);
 		return true;
 	}
 	return false;
@@ -203,6 +204,9 @@ function sessionValidation(req, res, next) {
 	}
 }
 
+
+
+
 app.use('/loggedin', sessionValidation);
 app.use('/loggedin/admin', adminAuthorization);
 app.get('/loggedin', async (req,res) => {
@@ -211,23 +215,45 @@ app.get('/loggedin', async (req,res) => {
     const imageName = `00${randomImageNumber}.gif`;
     var username = req.session.username;
     var rooms = await db_chats.getRooms({ username: username}); // each index is a row in the table
-    var mostRecentMessages = [];
-    for (var i = 0; i < rooms.length; i++) {
-        var room = rooms[i];
-        var mostRecentMessage = await db_chats.getMostRecentMessage({ username: username, room_id: room.room_id });
-        mostRecentMessages.push(mostRecentMessage);
-    }
-
+    
     res.render('protectedRoute.ejs', {
         "username": req.session.username,
         "imagea": `00${Math.floor(Math.random() * 3) + 1}.gif`,
         "imageb": `00${Math.floor(Math.random() * 3) + 1}.gif`,
         "imagec": `00${Math.floor(Math.random() * 3) + 1}.gif`,
         "isAdmin": req.session.loggedType == 'administrator',
-        "rooms": rooms,
-        "mostRecentMessages": mostRecentMessages
+        "rooms": rooms
     })
 });
+
+
+
+app.get('/createGroup', (req, res) => {
+
+    res.render("createGroup");
+});
+
+
+app.get('/room/:room_id', async (req,res) => {
+    var room_id = req.params.room_id;
+    console.log("=-=-=-=-=-=-=-=-=-=-= START - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=")
+    console.log("\n`app.get(\'\/room\/:id\')`: `room_id = req.params.room_id` = ", room_id)
+    console.log("");
+    var username = req.session.username;
+    var room = await db_chats.getRoom({ room_id: room_id, username: username});
+    console.log("`app.get(\'\/room\/:id\')`: room results (after awaiting DB): ")
+    console.log(room);
+    // var messages = await db_chats.getMessages({ room_id: room_id, username: username});
+    // res.render("chatroom", { room: room, messages: messages});
+    req.session_room_id = room.room_id;
+    console.log("=-=-=-=-=-=-=-=-=-=-= END - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=\n")
+    res.render('protectedRouteRoom.ejs', {
+        "username": req.session.username,
+        "room": room,
+        "session_room_id": req.session_room_id
+    })
+});
+
 
 app.get(['/loggedin/info', '/info'], (req,res) => {
     res.render("loggedin-info");
@@ -247,10 +273,6 @@ app.get(['/loggedin/memberinfo', '/memberinfo'], (req,res) => {
     res.render("memberInfo", {username: req.session.username, user_type: req.session.user_type});
 });
 
-app.get('/cat/:id', (req,res) => {
-    var cat = req.params.id;
-    res.render("cat", {cat: cat});
-});
 
 app.get('/api', (req,res) => {
 	var user = req.session.user;
