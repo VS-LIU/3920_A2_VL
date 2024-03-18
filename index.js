@@ -242,21 +242,37 @@ app.get('/room/:room_id', async (req,res) => {
     console.log("");
     var username = req.session.username;
     var room = await db_chats.getRoom({ room_id: room_id, username: username});
+    var roomSingle = room[0];
+
+    await db_messages.updateMostRecentReadMessageID(username, room_id);
+
     var messages = await db_messages.getMessagesForRoom({ room_id: room_id, username: username});
     console.log("`app.get(\'\/room\/:id\')`: room results (after awaiting DB): ")
     console.log(room);
-    // var messages = await db_chats.getMessages({ room_id: room_id, username: username});
-    // res.render("chatroom", { room: room, messages: messages});
     req.session_room_id = room.room_id;
     console.log("=-=-=-=-=-=-=-=-=-=-= END - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=\n")
     res.render('protectedRouteRoom.ejs', {
         "username": req.session.username,
-        "room": room,
+        "chat": roomSingle,
         "session_room_id": req.session_room_id,
-        "messages": messages
+        "messages": messages,
     })
 });
 
+app.post('/postMessage', async (req,res) => {
+    var username = req.session.username;
+    var text = req.body.text;
+    var room_id = req.body.room_id;
+    var room_user_id = req.body.room_user_id;
+    var success = await db_messages.createMessage({ room_user_id: room_user_id, username: username, text: text });
+    if (success) {
+        await db_messages.updateMostRecentReadMessageID(username, room_id);
+        res.redirect(`/room/${room_id}`);
+    }
+    else {
+        res.render("errorMessage", {error: "Failed to create message."} );
+    }
+});
 
 app.get(['/loggedin/info', '/info'], (req,res) => {
     res.render("loggedin-info");

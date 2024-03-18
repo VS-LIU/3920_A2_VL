@@ -6,19 +6,41 @@
   <div>
   </div>
   <div>
-<% room.forEach(function(chat){ %>
+
+<!-- if room is empty, print error message 403 -->
+<% if (!chat) { %>
+  <div class="container">
+    <h1>403 Forbidden</h1>
+    <p>You do not belong to this chatroom.</p>
+    <button class="btn btn-outline-dark" value="Back" onclick="history.back()">Back</button>
+    <button class="btn btn-outline-dark" value="Home" onclick="window.location.href='/'">Home</button>
+  </div>
+<% } %>
+
+
 <p>Welcome, <strong><%= username %></strong>!<button class=" ms-3 btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button></p>
 <!-- <button class="btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button> -->
 <!-- Chat Rooms -->
-<div class="container my-4">
+<div class="container my-4 w-50">
 
-    <div class="text-center col-sm border mb-5">
+    <div class="text-center border mb-5">
       <div><h2>"<%= chat.name %>"</h2>[chat room id: <%= chat.room_id %>]</div>
     </div>
 
  
     <% messages.forEach(function(message){ %>
       
+      <!-- if username is the same as `active_user`, align the div right  -->
+
+      <% if (message.username === username) { %>
+        <div class="d-flex flex-column justify-content-end">
+          <div class="ms-1 text-end"><strong><%= message.username %></strong></div>
+          <div class="offset-md-9 border p-2 justify-content-end">
+            <div class="text-end"><%= message.text %></div>
+          </div>
+          <div class="offset-md-3 text-end"><small><em><%= message.sent_datetime %></em></small></div>
+        </div>
+      <% } else { %>
       <div>
         <div class="ms-1"><strong><%= message.username %></strong></div>
       <div class="col-sm-3 border p-2">
@@ -27,16 +49,18 @@
       <div class="col-sm-3 text-end"><small><em><%= message.sent_datetime %></em></small></div>
     </div>
       <br>
-        
+      <% } %>
     <% }); %>
   <hr>
   <form action="/postMessage" method="post">
     <label for="message">Enter your message:</label><br>
-    <input type="text" id="message" name="message">
+    <input type="text" id="text" name="text">
     <button type="submit">Send</button>
+    <input type="hidden" name="room_user_id" value="<%= chat.room_user_id %>">
+    <input type="hidden" name="room_id" value="<%= chat.room_id %>">
   </form>
 </div>
-<% }); %>
+
 <br>
 <br>
 <hr>
