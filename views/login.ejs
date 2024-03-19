@@ -11,7 +11,12 @@
                 <p class="text-center h1 fw-bold mb-4 mx-1 mx-md-4 mt-4">
                   Login
                 </p>
-
+                <% if (invalidLogin) { %>
+                <div class="alert alert-danger" role="alert">
+                  Invalid username or password
+                </div>
+                <% } %>
+                
                 <!-- <form class="mx-1 mx-md-4" action="/login" method="POST"> -->
                   <form class="mx-1 mx-md-4" action='/loggingin' method='POST'>
                   <div class="d-flex flex-row align-items-center mb-4">

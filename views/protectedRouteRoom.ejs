@@ -8,7 +8,7 @@
   <div>
 
 <!-- if room is empty, print error message 403 -->
-<% if (!chat) { %>
+<% if (!chatroom) { %>
   <div class="container">
     <h1>403 Forbidden</h1>
     <p>You do not belong to this chatroom.</p>
@@ -38,14 +38,11 @@
 <div class="container my-4 w-50">
 
     <div class="text-center border mb-5">
-      <div><h2>"<%= chat.name %>"</h2>[chat room id: <%= chat.room_id %>]</div>
+      <div><h2>"<%= chatroom.name %>"</h2>[chat room id: <%= chatroom.room_id %>]</div>
     </div>
 
  
     <% messages.forEach(function(message){ %>
-      
-      <!-- if username is the same as `active_user`, align the div right  -->
-
       <% if (message.username === username) { %>
         <div class="d-flex flex-column justify-content-end">
           <div class="ms-1 text-end"><strong><%= message.username %></strong></div>
@@ -66,12 +63,12 @@
       <% } %>
     <% }); %>
   <hr>
-  <form action="/postMessage" method="post">
+  <form action="/postMessage" method="POST">
     <label for="message">Enter your message:</label><br>
     <input type="text" id="text" name="text">
     <button type="submit">Send</button>
-    <input type="hidden" name="room_user_id" value="<%= chat.room_user_id %>">
-    <input type="hidden" name="room_id" value="<%= chat.room_id %>">
+    <input type="hidden" name="room_user_id" value="<%= session_room_user_id %>">
+    <input type="hidden" name="room_id" value="<%= chatroom.room_id %>">
   </form>
 </div>
 
@@ -88,7 +85,7 @@
         <% availableUsers.forEach(function(user) { %>
           <input type="checkbox" name="selectedUserIDs" value="<%-  user.user_id %>"> <%= user.username %> <br>
         <% }); %>
-        <input type="hidden" name="room_id" value="<%- chat.room_id %>">
+        <input type="hidden" name="room_id" value="<%- chatroom.room_id %>">
         <br />
         <button type="submit">Submit Invite</button>
       </form>
@@ -116,6 +113,11 @@
         invitePopup.style.display = 'none';
       }
     });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    window.scrollTo(0, document.body.scrollHeight);
   });
 </script>
 <%- include('./partials/footer.ejs'); %>

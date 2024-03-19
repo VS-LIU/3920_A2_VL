@@ -4,46 +4,21 @@ async function createRoom(postData) {
 	// roomName: roomName, username: username, user_id: user_id, selectedUserIDs: selectedUserIDs
 	let params = {
 		roomName: postData.roomName,
-		user_id: postData.user_id,
-		selectedUserIDs: postData.selectedUserIDs
-		
+		username: postData.username
 	}
 	console.log("chats.js: createRoom(): roomName: " + postData.roomName);
-	console.log("chats.js: createRoom(): username: " + postData.username);
-	console.log("chats.js: createRoom(): user_id: " + postData.user_id);
-	console.log("chats.js: createRoom(): selectedUserIDs: " + postData.selectedUserIDs);
-	const { roomName, username, user_id, selectedUserIDs } = postData;
+	console.log("chats.js: createRoom(): User creating room: " + postData.username);
+	
+	// const { roomName, username, user_id, selectedUserIDs } = postData;
 	console.log ("chats.js: createRoom(): postData: ");
 	console.log(postData);
 	let createRoomSQL = `
-	START TRANSACTION;
 	INSERT INTO room (name, start_datetime)
 	VALUES (:roomName, NOW());
-	INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
-	VALUES (:user_id, LAST_INSERT_ID(), 0);
 	`;
-
-	for (const selectedUserID of params.selectedUserIDs) {
-		console.log("*******chats.js: createRoom(): selectedUserID: " + selectedUserID);
-		createRoomSQL += `
-			INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
-			VALUES (${selectedUserID}, LAST_INSERT_ID(), 0);
-		`;
-	}
-
-	// for (const selectedUserID of selectedUserIDs) {
-	// 	console.log("*******chats.js: createRoom(): selectedUserID: " + selectedUserID);
-    //     createRoomSQL += `
-    //         INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
-    //         VALUES (${selectedUserID}, LAST_INSERT_ID(), 0);
-    //     `;
-    // }
+	
 	console.log(">>>>>>>chats.js: createRoom(): createRoomSQL: ");
 	console.log(createRoomSQL);
-
-    createRoomSQL += `
-        COMMIT;
-    `;
 
 	try {
 		const results = await database.query(createRoomSQL, params);
@@ -62,13 +37,96 @@ async function createRoom(postData) {
 	}
 }
 
+async function addUsersToRoom(postData) {
+	
+	let params = {
+		active_user_id: postData.active_user_id,
+		room_id: postData.room_id,
+		selectedUserIDs: postData.selectedUserIDs
+	}
+	console.log("chats.js: addUsersToRoom(): room_id: " + postData.room_id);
+	console.log("chats.js: addUsersToRoom(): selectedUserIDs: " + postData.selectedUserIDs);
+	const { room_id, selectedUserIDs } = postData;
+	console.log ("chats.js: addUsersToRoom(): postData: ");
+	console.log(postData);
+	let addUsersToRoomSQL = `
+	INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
+	VALUES
+	(:active_user_id, LAST_INSERT_ID(), 0),
+	`;
+	
+	for (const selectedUserID of params.selectedUserIDs) {
+		console.log("*******chats.js: createRoom(): selectedUserID: " + selectedUserID);
+		//if last element, remove comma
+		if (selectedUserID === params.selectedUserIDs[params.selectedUserIDs.length - 1]) {
+			addUsersToRoomSQL += `(${selectedUserID}, LAST_INSERT_ID(), 0);`;
+			break;
+		}
+		
+		addUsersToRoomSQL += `
+			(${selectedUserID}, LAST_INSERT_ID(), 0),
+		`;
+	}
+
+	console.log(">>>>>>>chats.js: addUsersToRoom(): addUsersToRoomSQL: ");
+	console.log(addUsersToRoomSQL);
+
+	try {
+		const results = await database.query(addUsersToRoomSQL, params);
+		console.log("chats.js: addUsersToRoom(): Successfully added users to room.");
+		console.log("chats.js: addUsersToRoom()_params:");
+		console.log(params);
+		console.log("chats.js: addUsersToRoom()_results[0]:")
+		console.log(results[0]);
+		// return the id of the newly created room
+		return true;
+	}
+	catch (err) {
+		console.log("Error adding users to room");
+		console.log(err);
+		return false;
+	}
+}
+
+async function getActiveRoomUserID(postData) {
+	let getActiveRoomUserIDSQL = `
+		SELECT ru.room_user_id
+		FROM room_user ru
+		WHERE ru.user_id = :user_id
+		AND ru.room_id = :room_id;
+	`;
+
+	let params = {
+		user_id: postData.user_id,
+		room_id: postData.room_id,
+		username: postData.username
+	}
+
+	try {
+		console.log("---- START - /chats.js - getActiveRoomUserID(postData) ----")
+		const results = await database.query(getActiveRoomUserIDSQL, params);
+		console.log(`getActiveRoomUserID_params:`);
+		console.log(params);
+		console.log("getActiveRoomUserID_results[0]:")
+		console.log(results[0]);
+		console.log("---- END - /chats.js - getActiveRoomUserID(postData) ----\n")
+		return results[0];
+	}
+	catch (err) {
+		console.log("getActiveRoomUserID: Error trying to find room_user_id");
+		console.log(err);
+		return false;
+	}
+
+}
+
 async function getRoom(postData) {
 	let getRoomSQL = `
 		SELECT ru.user_id, u.username, ru.room_id, r.name, m.message_id, m.text, m.sent_datetime, ru.room_user_id, ru.most_recent_read_message_id
 		FROM room_user ru
 		JOIN room r ON ru.room_id = r.room_id
 		JOIN user u ON ru.user_id = u.user_id
-		JOIN message m ON ru.room_user_id = m.room_user_id
+		LEFT JOIN message m ON ru.room_user_id = m.room_user_id
 		-- WHERE u.username = :username
 		WHERE ru.room_id = :room_id;
 	`;
@@ -212,6 +270,31 @@ async function getNumberUnreadMessages(postData) {
 	}
 }
 
+async function getUsersInRoom(roomID) {
+	let getUsersInRoomSQL = `
+	SELECT u.user_id, u.username
+	FROM user u
+	JOIN room_user ru ON u.user_id = ru.user_id
+	WHERE ru.room_id = :room_id;
+	`;
+
+	let params = {
+		room_id: roomID
+	};
+
+	try {
+		const results = await database.query(getUsersInRoomSQL, params);
+		console.log("chats_getUsersInRoom_Successfully retrieved users in room_id: " + roomID);
+		console.log("chats_getUsersInRoom_results[0]:")
+		console.log(results[0]);
+		return results;
+	} catch (err) {
+		console.log("Error getting users in room");
+		console.log(err);
+		return false;
+	}
+}
+
 async function getAvailableUsers(roomID) {
     let getAvailableUsersSQL = `
 	SELECT u.user_id, u.username
@@ -278,4 +361,4 @@ async function getAllUsers() {
 	}
 }
 
-module.exports = { createRoom, getRooms, getRoom, getNumberUnreadMessages, getAvailableUsers, inviteUserToRoom, getAllUsers };
+module.exports = { addUsersToRoom, createRoom, getRooms, getRoom, getNumberUnreadMessages, getAvailableUsers, inviteUserToRoom, getAllUsers, getActiveRoomUserID, getUsersInRoom };

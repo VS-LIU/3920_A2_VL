@@ -21,7 +21,9 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs')
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }))
+const path = require('path');
 app.use(express.static(__dirname + "/public"));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json())
 
 app.use(session({ 
@@ -120,7 +122,7 @@ app.get('/createUser', async (req,res) => {
 });
 
 app.get('/login', (req,res) => {
-    res.render("login");
+    res.render("login.ejs", { "invalidLogin": false });
 });
  
 app.post('/submitUser', async (req,res) => {
@@ -155,12 +157,15 @@ app.post('/loggingin', async (req,res) => {
                 return;
             }
             else {
-                console.log("invalid password");
+                
+                console.log('Failed to authenticate user. Passwords do not match.');
+                res.render('login.ejs', { "invalidLogin": true });
+                return; 
             }
         }
         else {
             console.log('invalid number of users matched: '+results.length+" (expected 1).");
-            res.redirect('/login');
+            res.render('login.ejs', { "invalidLogin": true });
             return;            
         }
     }
@@ -247,17 +252,19 @@ app.post('/createGroup', async (req, res) => {
     var roomName = req.body.group_name;
     var selectedUserIDs = req.body.selectedUserIDs;
     var username = req.session.username;
-    var user_id = req.session.user_id;
-    var success = await db_chats.createRoom({ roomName: roomName, username: username, user_id: user_id, selectedUserIDs: selectedUserIDs });
-    console.log("app.post(\'\/createGroup\'): success: ", success);
-    if (success) {
+    var active_user_id = req.session.user_id;
+    var createRoomSuccess = await db_chats.createRoom({ roomName: roomName, username: username });
+    var addUsersToRoomSuccess = await db_chats.addUsersToRoom({ roomName: roomName, username: username, active_user_id: active_user_id, selectedUserIDs: selectedUserIDs });
+    console.log("@@@@@@@@@@@@@@app.post(\'\/createGroup\'): createRoomSuccess: ", createRoomSuccess);
+    console.log("@@@@@@@@@@@@@@app.post(\'\/createGroup\'): addUsersToRoomSuccess: ", addUsersToRoomSuccess);
+    if (createRoomSuccess && addUsersToRoomSuccess) {
         // res.send HTML page with success message and button to go back to home page
     
         const successMessage = "Group created successfully.";  
         const htmlContent = `
           <div>
             <p>${successMessage}</p>
-            <a href="${success}"><button>Visit Chat Room</button></a>
+            <a href="/room/${createRoomSuccess}"><button>Visit Chat Room</button></a>
           </div>
         `;
     
@@ -275,8 +282,9 @@ app.get('/room/:room_id', async (req,res) => {
     console.log("\n`app.get(\'\/room\/:id\')`: `room_id = req.params.room_id` = ", room_id)
     console.log("");
     var username = req.session.username;
-    var room = await db_chats.getRoom({ room_id: room_id, username: username});
-    var roomSingle = room[0];
+    console.log("`app.get(\'\/room\/:id\')`: `username = req.session.username` = ", username);
+    var roomDBResults = await db_chats.getRoom({ room_id: room_id, username: username});
+    var room = roomDBResults[0];
 
     await db_messages.updateMostRecentReadMessageID(username, room_id);
     const availableUsers = await db_chats.getAvailableUsers(room_id);
@@ -284,16 +292,19 @@ app.get('/room/:room_id', async (req,res) => {
     console.log("app.get(\'\/room\/:id\'): availableUsersResults: ");
     console.log(availableUsersResults);
     var messages = await db_messages.getMessagesForRoom({ room_id: room_id, username: username});
-    console.log("`app.get(\'\/room\/:id\')`: room results (after awaiting DB): ")
-    console.log(room);
+    console.log("`app.get(\'\/room\/:id\')`: room results (from db_chats.getRoom): ")
+    console.log(roomDBResults);
     req.session_room_id = room.room_id;
+    var room_user_id = await db_chats.getActiveRoomUserID({ room_id: room_id, username: username, user_id: req.session.user_id });
+    req.session_room_user_id = room_user_id[0].room_user_id;
     console.log("=-=-=-=-=-=-=-=-=-=-= END - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=\n")
     res.render('protectedRouteRoom.ejs', {
         "username": req.session.username,
-        "chat": roomSingle,
+        "chatroom": room,
         "session_room_id": req.session_room_id,
         "messages": messages,
-        "availableUsers": availableUsersResults
+        "availableUsers": availableUsersResults,
+        "session_room_user_id": req.session_room_user_id
     })
 });
 
@@ -317,9 +328,12 @@ app.post('/inviteUsers', async (req, res) => {
 });
 app.post('/postMessage', async (req,res) => {
     var username = req.session.username;
+    console.log("app.post(\'\/postMessage\'): `username = req.session.username` = ", username);
     var text = req.body.text;
     var room_id = req.body.room_id;
     var room_user_id = req.body.room_user_id;
+    console.log("app.post(\'\/postMessage\'): `room_id = req.body.room_id` = ", room_id);
+    console.log("app.post(\'\/postMessage\'): `room_user_id = req.body.room_user_id` = ", room_user_id);
     var success = await db_messages.createMessage({ room_user_id: room_user_id, username: username, text: text });
     if (success) {
         await db_messages.updateMostRecentReadMessageID(username, room_id);
