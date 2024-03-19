@@ -9,8 +9,11 @@ async function main() {
   // // To use this local connection, make sure you have installed MongoDB locally and ran `mongod.exe` or run `mongod` in the terminal
   // await mongoose.connect('mongodb://127.0.0.1:27017/comp2537w2');
   // // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
-  await mongoose.connect(`mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@cluster1.ncanyuw.mongodb.net/?retryWrites=true&w=majority`);
-  
+  var connection_mongodb = await mongoose.connect(`mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@cluster1.ncanyuw.mongodb.net/?retryWrites=true&w=majority`);
+  if (!connection_mongodb) {
+    console.log("server.js: Failed to connect to MongoDB Database.");
+    return;
+  }
   console.log(`server.js: Successfully connected to MongoDB Database.`);
   app.listen(process.env.PORT || 9090, () => {
     console.log(`server.js: Server is running on port ${process.env.PORT} and listening for HTTP requests`);
