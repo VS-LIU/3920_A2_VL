@@ -339,7 +339,7 @@ async function inviteUserToRoom(userId, roomId) {
         console.log('User invited to room successfully');
     } catch (error) {
         console.error('Error inviting user to room:', error);
-        throw error; // Propagate error to caller
+        throw error; 
     }
 }
 

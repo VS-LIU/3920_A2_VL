@@ -7,7 +7,6 @@
   </div>
   <div>
 
-<!-- if room is empty, print error message 403 -->
 <% if (!chatroom) { %>
   <div class="container">
     <h1>403 Forbidden</h1>
@@ -16,7 +15,6 @@
     <button class="btn btn-outline-dark" value="Home" onclick="window.location.href='/'">Home</button>
   </div>
 <% } %>
-
 
 <div>
   <p>Welcome, <strong><%= username %></strong>!<button class=" ms-3 btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button></p>
@@ -27,12 +25,9 @@
 
 <!-- <button class="btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button> -->
 <div class="container my-4 w-50">
-
     <div class="text-center border mb-5">
       <div><h2>"<%= chatroom.name %>"</h2>[chat room id: <%= chatroom.room_id %>]</div>
     </div>
-
- 
     <% messages.forEach(function(message){ %>
       <% if (message.username === username) { %>
         <div class="d-flex flex-column justify-content-end">
@@ -62,11 +57,9 @@
     <input type="hidden" name="room_id" value="<%= chatroom.room_id %>">
   </form>
 </div>
-
 <br>
 <br>
 <hr>
-<!-- Popup Dialogue Box for Inviting Users -->
 <div id="inviteUsersPopup" class="modal">
   <div class="modal-content p-5">
     <span class="close">&times;</span>
@@ -85,7 +78,6 @@
 </div>
 
 <script>
-  // JavaScript code to handle invite button click and popup model
   document.addEventListener('DOMContentLoaded', function() {
     const inviteUsersBtn = document.getElementById('inviteUsersBtn');
     const invitePopup = document.getElementById('inviteUsersPopup');
