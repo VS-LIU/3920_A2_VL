@@ -1,22 +1,39 @@
 const database = require('../databaseConnection.js');
 
 async function getMessagesForRoom(postData) {
+    // let getMessagesSQL = `
+    //     SELECT 	m.message_id AS message_id,
+    //     m.room_user_id AS room_user_id,
+    //     DATE_FORMAT(m.sent_datetime, '%a %b %e %Y %H:%i:%s') AS sent_datetime,
+    //     m.text AS text,
+    //     r.room_id AS room_id,
+    //     r.name AS room_name,
+    //     u.user_id AS user_id,
+    //     u.username AS username
+    //     FROM message m
+    //     JOIN room_user ru ON m.room_user_id = ru.room_user_id
+    //     JOIN room r ON ru.room_id = r.room_id
+    //     JOIN user u ON ru.user_id = u.user_id
+    //     WHERE r.room_id = :room_id
+    //     ORDER BY sent_datetime ASC;
+    // `;
     let getMessagesSQL = `
-        SELECT 	m.message_id AS message_id,
-        m.room_user_id AS room_user_id,
-        DATE_FORMAT(m.sent_datetime, '%a %b %e %Y %H:%i:%s') AS sent_datetime,
-        m.text AS text,
-        r.room_id AS room_id,
-        r.name AS room_name,
-        u.user_id AS user_id,
-        u.username AS username
-        FROM message m
-        JOIN room_user ru ON m.room_user_id = ru.room_user_id
-        JOIN room r ON ru.room_id = r.room_id
-        JOIN user u ON ru.user_id = u.user_id
-        WHERE r.room_id = :room_id
-        ORDER BY sent_datetime ASC;
+    SELECT 	m.message_id AS message_id,
+    m.room_user_id AS room_user_id,
+    DATE_FORMAT(m.sent_datetime, '%a %b %e %Y %H:%i:%s') AS sent_datetime,
+    m.text AS text,
+    r.room_id AS room_id,
+    r.name AS room_name,
+    u.user_id AS user_id,
+    u.username AS username
+    FROM message m
+    JOIN room_user ru ON m.room_user_id = ru.room_user_id
+    JOIN room r ON ru.room_id = r.room_id
+    JOIN user u ON ru.user_id = u.user_id
+    WHERE r.room_id = :room_id
+    ORDER BY m.sent_datetime ASC;
     `;
+
 
     let params = {
         room_id: postData.room_id

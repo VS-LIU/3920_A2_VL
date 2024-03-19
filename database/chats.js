@@ -2,25 +2,34 @@ const database = require('../databaseConnection.js');
 
 async function createRoom(postData) {
 	let createRoomSQL = `
-		INSERT INTO user
-		(email, username, password)
-		VALUES
-		(:email, :user, :passwordHash);
+
+		INSERT INTO room (name, start_datetime)
+		VALUES (:name, NOW());
+
+		INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
+		VALUES (:user_id, LAST_INSERT_ID(), 0);
 	`;
+
+	// roomName: roomName, username: username, user_id: user_id, selectedUserIDs: selectedUserIDs
 	let params = {
-		email: postData.email,
-		user: postData.user,
-		passwordHash: postData.hashedPassword
+		name: postData.roomName,
+		user_id: postData.user_id,
+		selectedUserIDs: postData.selectedUserIDs
+		
 	}
 
 	try {
-		const results = await database.query(createUserSQL, params);
-		console.log("Successfully created user");
+		const results = await database.query(createRoomSQL, params);
+		console.log("chats.js: createRoom(): Successfully created room.");
+		console.log("chats.js: createRoom()_params:");
+		console.log(params);
+		console.log("chats.js: createRoom()_results[0]:")
 		console.log(results[0]);
-		return true;
+		// return the id of the newly created room
+		return results[0].insertId;
 	}
 	catch (err) {
-		console.log("Error inserting user");
+		console.log("Error inserting room");
 		console.log(err);
 		return false;
 	}
@@ -59,29 +68,6 @@ async function getRoom(postData) {
 	}
 }
 async function getRooms(postData) {
-	// let getRoomsSQL = `
-	// SELECT  ru.room_user_id, 
-	// r.room_id, 
-	// r.name, 
-	// u.user_id, 
-	// u.username, 
-	// ru.most_recent_read_message_id,
-	// DATE_FORMAT(m.sent_datetime, '%a %b %e %Y %H:%i:%s') AS sent_datetime,
-	// (SELECT COUNT(DISTINCT m2.message_id)
-	//  FROM message m2
-	//  JOIN room_user ru2 ON m2.room_user_id = ru2.room_user_id
-	//  WHERE ru2.room_id = ru.room_id
-	//  AND m2.message_id > ru.most_recent_read_message_id
-	// ) AS number_of_messages_behind
-	// FROM room_user ru
-	// JOIN room_user ru2 ON ru.room_id = ru2.room_id
-	// JOIN room r ON ru.room_id = r.room_id
-	// JOIN user u ON ru.user_id = u.user_id
-	// JOIN message m ON ru.room_user_id = m.room_user_id 
-	// WHERE u.username = :username
-	// GROUP BY ru.user_id, ru.room_id, sent_datetime
-	// HAVING number_of_messages_behind >= 0;
-	// `;
 	let getRoomsSQL = `
 	SELECT 
     ru.room_user_id, 
@@ -199,5 +185,70 @@ async function getNumberUnreadMessages(postData) {
 	}
 }
 
+async function getAvailableUsers(roomID) {
+    let getAvailableUsersSQL = `
+	SELECT u.user_id, u.username
+	FROM user u
+	WHERE u.user_id NOT IN (
+		SELECT ru.user_id
+		FROM room_user ru
+		WHERE ru.room_id = :room_id
+	);       
+    `;
 
-module.exports = { createRoom, getRooms, getRoom, getNumberUnreadMessages };
+    let params = {
+        room_id: roomID
+    };
+
+    try {
+        const results = await database.query(getAvailableUsersSQL, params);
+        console.log("chats_getAvailableUsers_Successfully retrieved available users for room_id: " + roomID);
+		console.log("chats_getAvailableUsers_results[0]:")
+		console.log(results[0]);
+        return results;
+    } catch (err) {
+        console.log("Error getting available users");
+        console.log(err);
+        return false;
+    }
+}
+
+async function inviteUserToRoom(userId, roomId) {
+    const inviteUserToRoomSQL = `
+        INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
+        VALUES (:user_id, :room_id, 0);
+    `;
+
+    const params = {
+        user_id: userId,
+        room_id: roomId
+    };
+
+    try {
+        await database.query(inviteUserToRoomSQL, params);
+        console.log('User invited to room successfully');
+    } catch (error) {
+        console.error('Error inviting user to room:', error);
+        throw error; // Propagate error to caller
+    }
+}
+
+async function getAllUsers() {
+	const getAllUsersSQL = `
+		SELECT user_id, username
+		FROM user;
+	`;
+	try {
+		const results = await database.query(getAllUsersSQL);
+		console.log("chats_getAllUsers_Successfully retrieved all users");
+		console.log("chats_getAllUsers_results[0]:")
+		console.log(results[0]);
+		return results;
+	} catch (err) {
+		console.log("Error getting all users");
+		console.log(err);
+		return false;
+	}
+}
+
+module.exports = { createRoom, getRooms, getRoom, getNumberUnreadMessages, getAvailableUsers, inviteUserToRoom, getAllUsers };

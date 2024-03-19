@@ -18,7 +18,21 @@
 <% } %>
 
 
-<p>Welcome, <strong><%= username %></strong>!<button class=" ms-3 btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button></p>
+<div>
+  <p>Welcome, <strong><%= username %></strong>!<button class=" ms-3 btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button></p>
+</div>
+<div>
+  <button id="inviteUsersBtn" class="btn btn-outline-dark">Invite Users</button>
+</div>
+<div>
+<button id="checkAvailableUsersBtn" class="btn btn-outline-dark">Check Available Users</button>
+
+<div id="availableUsersContainer"></div>
+<!-- Code goes here -->
+</div>
+<div>
+  <!-- invite person button -->
+</div>
 <!-- <button class="btn btn-outline-dark" value="Logout" onclick="window.location.href='/logout'">Logout</button> -->
 <!-- Chat Rooms -->
 <div class="container my-4 w-50">
@@ -35,7 +49,7 @@
       <% if (message.username === username) { %>
         <div class="d-flex flex-column justify-content-end">
           <div class="ms-1 text-end"><strong><%= message.username %></strong></div>
-          <div class="offset-md-9 border p-2 justify-content-end">
+          <div class="offset-md-8 border p-2 justify-content-end">
             <div class="text-end"><%= message.text %></div>
           </div>
           <div class="offset-md-3 text-end"><small><em><%= message.sent_datetime %></em></small></div>
@@ -43,10 +57,10 @@
       <% } else { %>
       <div>
         <div class="ms-1"><strong><%= message.username %></strong></div>
-      <div class="col-sm-3 border p-2">
+      <div class="col-sm-4 border p-2">
         <div><%= message.text %></div>
       </div>
-      <div class="col-sm-3 text-end"><small><em><%= message.sent_datetime %></em></small></div>
+      <div class="col-sm-4 text-end"><small><em><%= message.sent_datetime %></em></small></div>
     </div>
       <br>
       <% } %>
@@ -64,4 +78,44 @@
 <br>
 <br>
 <hr>
+<!-- Popup Dialogue Box for Inviting Users -->
+<div id="inviteUsersPopup" class="modal">
+  <div class="modal-content p-5">
+    <span class="close">&times;</span>
+       <div>
+      <form id="inviteForm" action="/inviteUsers" method="POST">
+        <h2>Select Users to Invite:</h2>
+        <% availableUsers.forEach(function(user) { %>
+          <input type="checkbox" name="selectedUserIDs" value="<%-  user.user_id %>"> <%= user.username %> <br>
+        <% }); %>
+        <input type="hidden" name="room_id" value="<%- chat.room_id %>">
+        <br />
+        <button type="submit">Submit Invite</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // JavaScript code to handle invite button click and popup model
+  document.addEventListener('DOMContentLoaded', function() {
+    const inviteUsersBtn = document.getElementById('inviteUsersBtn');
+    const invitePopup = document.getElementById('inviteUsersPopup');
+    const closeButton = invitePopup.querySelector('.close');
+
+    inviteUsersBtn.addEventListener('click', function() {
+      invitePopup.style.display = 'block';
+    });
+
+    closeButton.addEventListener('click', function() {
+      invitePopup.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+      if (event.target === invitePopup) {
+        invitePopup.style.display = 'none';
+      }
+    });
+  });
+</script>
 <%- include('./partials/footer.ejs'); %>

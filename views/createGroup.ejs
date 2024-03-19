@@ -1,4 +1,35 @@
 <%- include('./partials/header.ejs'); %>
  
-    
+    <!-- Form to create a new group. A textbox to accept the name of the new group and a div container that lists all available users except the 
+    current signed in user (active_username i.e. req.session.username) and a button that submits this, calling a POST method-->
+    <div class="container">
+
+        <div class="mb-4">
+            <h1>Create a New Chat Room</h1>
+        </div>
+        <form action="/createGroup" method="POST">
+            <div class="form-group col-sm-6 mb-3">
+                <label for="group_name">Chat room name:</label>
+                <input type="text" class="form-control" id="group_name" name="group_name" required>
+            </div>
+            <div class="form-group">
+                <label for="group_members">Invite:</label>
+                <div class="form-check
+                ">
+                    <% allUsers.forEach(function(user) { %>
+                    <% if (user.username !== active_user
+                    ) { %>
+                    <input type="checkbox" class="form-check-input" name="selectedUserIDs" value="<%-  user
+                    .user_id %>"> <%= user.username %> <br>
+                    <% } %>
+                    <% }); %>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Group</button>
+        </form>
+    </div>
+
+
+
+
 <%- include('./partials/footer.ejs'); %>

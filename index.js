@@ -148,6 +148,7 @@ app.post('/loggingin', async (req,res) => {
             if (bcrypt.compareSync(password, results[0].password)) {
                 req.session.authenticated = true;
                 req.session.username = username;
+                req.session.user_id = results[0].user_id;
                 // req.session.user_type = results[0].type;
                 req.session.cookie.maxAge = expireTime;
                 res.redirect('/loggedIn');
@@ -229,9 +230,45 @@ app.get('/loggedin', async (req,res) => {
 
 
 
-app.get('/createGroup', (req, res) => {
+app.get('/createGroup', async (req, res) => {
 
-    res.render("createGroup");
+    var getAllUsers = await db_chats.getAllUsers();
+    console.log("app.get(\'\/createGroup\'): getAllUsers: ");
+    console.log(getAllUsers);
+
+
+    res.render('createGroup', {
+        "active_user": req.session.username,
+        "allUsers": getAllUsers[0]
+    })
+});
+
+app.post('/createGroup', async (req, res) => {
+    var roomName = req.body.group_name;
+    var selectedUserIDs = req.body.selectedUserIDs;
+    var username = req.session.username;
+    var user_id = req.session.user_id;
+    var success = await db_chats.createRoom({ roomName: roomName, username: username, user_id: user_id, selectedUserIDs: selectedUserIDs });
+    console.log("app.post(\'\/createGroup\'): success: ", success);
+    if (success) {
+        // res.send HTML page with success message and button to go back to home page
+    
+        const successMessage = "Group created successfully.";
+        
+
+    
+        const htmlContent = `
+          <div>
+            <p>${successMessage}</p>
+            <a href="${success}"><button>Visit Chat Room</button></a>
+          </div>
+        `;
+    
+        res.send(htmlContent);  
+    }
+    else {
+        res.render("errorMessage", {error: "Failed to create group."} );
+    }
 });
 
 
@@ -245,7 +282,10 @@ app.get('/room/:room_id', async (req,res) => {
     var roomSingle = room[0];
 
     await db_messages.updateMostRecentReadMessageID(username, room_id);
-
+    const availableUsers = await db_chats.getAvailableUsers(room_id);
+    const availableUsersResults = availableUsers[0];
+    console.log("app.get(\'\/room\/:id\'): availableUsersResults: ");
+    console.log(availableUsersResults);
     var messages = await db_messages.getMessagesForRoom({ room_id: room_id, username: username});
     console.log("`app.get(\'\/room\/:id\')`: room results (after awaiting DB): ")
     console.log(room);
@@ -256,9 +296,28 @@ app.get('/room/:room_id', async (req,res) => {
         "chat": roomSingle,
         "session_room_id": req.session_room_id,
         "messages": messages,
+        "availableUsers": availableUsersResults
     })
 });
 
+
+// Create a new route for inviting users
+app.post('/inviteUsers', async (req, res) => {
+    var room_id = req.body.room_id;
+    var selectedUserIDs = req.body.selectedUserIDs;
+
+    try {
+        // Loop through selectedUserIds and insert records into room_user table
+        for (const userID of selectedUserIDs) {
+            await db_chats.inviteUserToRoom(userID, room_id);
+        }
+
+        res.json({ success: true, message: 'Users invited successfully' });
+    } catch (error) {
+        console.error('Error inviting users:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 app.post('/postMessage', async (req,res) => {
     var username = req.session.username;
     var text = req.body.text;
