@@ -1,22 +1,49 @@
 const database = require('../databaseConnection.js');
 
 async function createRoom(postData) {
-	let createRoomSQL = `
-
-		INSERT INTO room (name, start_datetime)
-		VALUES (:name, NOW());
-
-		INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
-		VALUES (:user_id, LAST_INSERT_ID(), 0);
-	`;
-
 	// roomName: roomName, username: username, user_id: user_id, selectedUserIDs: selectedUserIDs
 	let params = {
-		name: postData.roomName,
+		roomName: postData.roomName,
 		user_id: postData.user_id,
 		selectedUserIDs: postData.selectedUserIDs
 		
 	}
+	console.log("chats.js: createRoom(): roomName: " + postData.roomName);
+	console.log("chats.js: createRoom(): username: " + postData.username);
+	console.log("chats.js: createRoom(): user_id: " + postData.user_id);
+	console.log("chats.js: createRoom(): selectedUserIDs: " + postData.selectedUserIDs);
+	const { roomName, username, user_id, selectedUserIDs } = postData;
+	console.log ("chats.js: createRoom(): postData: ");
+	console.log(postData);
+	let createRoomSQL = `
+	START TRANSACTION;
+	INSERT INTO room (name, start_datetime)
+	VALUES (:roomName, NOW());
+	INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
+	VALUES (:user_id, LAST_INSERT_ID(), 0);
+	`;
+
+	for (const selectedUserID of params.selectedUserIDs) {
+		console.log("*******chats.js: createRoom(): selectedUserID: " + selectedUserID);
+		createRoomSQL += `
+			INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
+			VALUES (${selectedUserID}, LAST_INSERT_ID(), 0);
+		`;
+	}
+
+	// for (const selectedUserID of selectedUserIDs) {
+	// 	console.log("*******chats.js: createRoom(): selectedUserID: " + selectedUserID);
+    //     createRoomSQL += `
+    //         INSERT INTO room_user (user_id, room_id, most_recent_read_message_id)
+    //         VALUES (${selectedUserID}, LAST_INSERT_ID(), 0);
+    //     `;
+    // }
+	console.log(">>>>>>>chats.js: createRoom(): createRoomSQL: ");
+	console.log(createRoomSQL);
+
+    createRoomSQL += `
+        COMMIT;
+    `;
 
 	try {
 		const results = await database.query(createRoomSQL, params);

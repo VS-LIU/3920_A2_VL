@@ -17,11 +17,10 @@
                 <div class="form-check
                 ">
                     <% allUsers.forEach(function(user) { %>
-                    <% if (user.username !== active_user
-                    ) { %>
-                    <input type="checkbox" class="form-check-input" name="selectedUserIDs" value="<%-  user
-                    .user_id %>"> <%= user.username %> <br>
-                    <% } %>
+                        <% if (user.username !== active_user) { %>
+                            <input type="checkbox" class="form-check-input" name="selectedUserIDs" value="<%-  user.user_id %>"> <%= user.username %> 
+                            <br>
+                        <% } %>
                     <% }); %>
                 </div>
             </div>

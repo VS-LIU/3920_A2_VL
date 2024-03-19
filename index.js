@@ -253,10 +253,7 @@ app.post('/createGroup', async (req, res) => {
     if (success) {
         // res.send HTML page with success message and button to go back to home page
     
-        const successMessage = "Group created successfully.";
-        
-
-    
+        const successMessage = "Group created successfully.";  
         const htmlContent = `
           <div>
             <p>${successMessage}</p>
