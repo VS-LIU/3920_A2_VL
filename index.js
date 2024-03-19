@@ -29,8 +29,8 @@ app.use(express.json())
 app.use(session({ 
     secret: node_session_secret,
     store: MongoStore.create({
-        // mongoUrl: `mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@${process.env.ATLAS_DB_HOST}/?retryWrites=true&w=majority`,
-        mongoUrl: `mongodb://127.0.0.1:27017/sessionStoreDB`,
+        mongoUrl: `mongodb+srv://${process.env.ATLAS_DB_USERNAME}:${process.env.ATLAS_DB_PASSWORD}@${process.env.ATLAS_DB_HOST}/?retryWrites=true&w=majority`,
+        // mongoUrl: `mongodb://127.0.0.1:27017/sessionStoreDB`,
         crypto: {
             secret: process.env.MONGO_SESSION_SECRET,
         },
