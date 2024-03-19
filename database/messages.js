@@ -42,7 +42,7 @@ async function getMessagesForRoom(postData) {
     try {
         const results = await database.query(getMessagesSQL, params);
         console.log("Successfully retrieved messages for room_id " + postData.room_id);
-        console.log(results[0]);
+        // console.log(results[0]);
         return results[0];
     }
     catch (err) {

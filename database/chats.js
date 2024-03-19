@@ -6,8 +6,6 @@ async function createRoom(postData) {
 		roomName: postData.roomName,
 		username: postData.username
 	}
-	console.log("chats.js: createRoom(): roomName: " + postData.roomName);
-	console.log("chats.js: createRoom(): User creating room: " + postData.username);
 	
 	// const { roomName, username, user_id, selectedUserIDs } = postData;
 	console.log ("chats.js: createRoom(): postData: ");
@@ -17,16 +15,16 @@ async function createRoom(postData) {
 	VALUES (:roomName, NOW());
 	`;
 	
-	console.log(">>>>>>>chats.js: createRoom(): createRoomSQL: ");
-	console.log(createRoomSQL);
+	// console.log(">>>>>>>chats.js: createRoom(): createRoomSQL: ");
+	// console.log(createRoomSQL);
 
 	try {
 		const results = await database.query(createRoomSQL, params);
 		console.log("chats.js: createRoom(): Successfully created room.");
-		console.log("chats.js: createRoom()_params:");
-		console.log(params);
-		console.log("chats.js: createRoom()_results[0]:")
-		console.log(results[0]);
+		// console.log("chats.js: createRoom()_params:");
+		// console.log(params);
+		// console.log("chats.js: createRoom()_results[0]:")
+		// console.log(results[0]);
 		// return the id of the newly created room
 		return results[0].insertId;
 	}
@@ -44,8 +42,7 @@ async function addUsersToRoom(postData) {
 		room_id: postData.room_id,
 		selectedUserIDs: postData.selectedUserIDs
 	}
-	console.log("chats.js: addUsersToRoom(): room_id: " + postData.room_id);
-	console.log("chats.js: addUsersToRoom(): selectedUserIDs: " + postData.selectedUserIDs);
+
 	const { room_id, selectedUserIDs } = postData;
 	console.log ("chats.js: addUsersToRoom(): postData: ");
 	console.log(postData);
@@ -68,8 +65,8 @@ async function addUsersToRoom(postData) {
 		`;
 	}
 
-	console.log(">>>>>>>chats.js: addUsersToRoom(): addUsersToRoomSQL: ");
-	console.log(addUsersToRoomSQL);
+	// console.log(">>>>>>>chats.js: addUsersToRoom(): addUsersToRoomSQL: ");
+	// console.log(addUsersToRoomSQL);
 
 	try {
 		const results = await database.query(addUsersToRoomSQL, params);
@@ -103,13 +100,13 @@ async function getActiveRoomUserID(postData) {
 	}
 
 	try {
-		console.log("---- START - /chats.js - getActiveRoomUserID(postData) ----")
+		// console.log("---- START - /chats.js - getActiveRoomUserID(postData) ----")
 		const results = await database.query(getActiveRoomUserIDSQL, params);
-		console.log(`getActiveRoomUserID_params:`);
-		console.log(params);
-		console.log("getActiveRoomUserID_results[0]:")
-		console.log(results[0]);
-		console.log("---- END - /chats.js - getActiveRoomUserID(postData) ----\n")
+		// console.log(`getActiveRoomUserID_params:`);
+		// console.log(params);
+		// console.log("getActiveRoomUserID_results[0]:")
+		// console.log(results[0]);
+		// console.log("---- END - /chats.js - getActiveRoomUserID(postData) ----\n")
 		return results[0];
 	}
 	catch (err) {
@@ -137,13 +134,13 @@ async function getRoom(postData) {
 	}
 
 	try {
-		console.log("---- START - /chats.js - getRoom(postData) ----")
+		// console.log("---- START - /chats.js - getRoom(postData) ----")
 		const results = await database.query(getRoomSQL, params);
-		console.log(`getRoom_params:`);
-		console.log(params);
-		console.log("getRoom_results[0]:")
-		console.log(results[0]);
-		console.log("---- END - /chats.js - getRoom(postData) ----\n")
+		// console.log(`getRoom_params:`);
+		// console.log(params);
+		// console.log("getRoom_results[0]:")
+		// console.log(results[0]);
+		// console.log("---- END - /chats.js - getRoom(postData) ----\n")
 		return results[0];
 	}
 	catch (err) {
@@ -207,14 +204,14 @@ HAVING
 	}
 
 	try {
-		console.log("getRooms_postData:");
-		console.log(postData);
+		// console.log("getRooms_postData:");
+		// console.log(postData);
 		const results = await database.query(getRoomsSQL, params);
-		console.log("getRooms: Successfully retrieved rooms");
-		console.log("getRooms_Results:");
-		console.log(results);
-		console.log("getRooms_Results[0]:")
-		console.log(results[0]);
+		// console.log("getRooms: Successfully retrieved rooms");
+		// console.log("getRooms_Results:");
+		// console.log(results);
+		// console.log("getRooms_Results[0]:")
+		// console.log(results[0]);
 		return results[0];
 	}
 	catch (err) {
@@ -256,12 +253,12 @@ async function getNumberUnreadMessages(postData) {
 	try {
 		// const mostRecentMessageID = await database.query(getMostRecentMessageIDSQL, params);
 		const numberOfUnreadMessages = await database.query(getNumberUnreadMessagesSQL, params);
-		console.log("Successfully retrieved most recent message");
-		console.log("mostRecentMessageText: \n");
-		console.log(mostRecentMessageText);
-		console.log("mostRecentMessageText[0]: \n")
-		console.log(mostRecentMessageText[0]);
-		return mostRecentMessageText[0];
+		// console.log("Successfully retrieved most recent message");
+		// console.log("mostRecentMessageText: \n");
+		// console.log(mostRecentMessageText);
+		// console.log("mostRecentMessageText[0]: \n")
+		// console.log(mostRecentMessageText[0]);
+		return numberOfUnreadMessages[0];
 	}
 	catch (err) {
 		console.log("Error getting messages");
@@ -284,9 +281,9 @@ async function getUsersInRoom(roomID) {
 
 	try {
 		const results = await database.query(getUsersInRoomSQL, params);
-		console.log("chats_getUsersInRoom_Successfully retrieved users in room_id: " + roomID);
-		console.log("chats_getUsersInRoom_results[0]:")
-		console.log(results[0]);
+		// console.log("chats_getUsersInRoom_Successfully retrieved users in room_id: " + roomID);
+		// console.log("chats_getUsersInRoom_results[0]:")
+		// console.log(results[0]);
 		return results;
 	} catch (err) {
 		console.log("Error getting users in room");
@@ -313,8 +310,8 @@ async function getAvailableUsers(roomID) {
     try {
         const results = await database.query(getAvailableUsersSQL, params);
         console.log("chats_getAvailableUsers_Successfully retrieved available users for room_id: " + roomID);
-		console.log("chats_getAvailableUsers_results[0]:")
-		console.log(results[0]);
+		// console.log("chats_getAvailableUsers_results[0]:")
+		// console.log(results[0]);
         return results;
     } catch (err) {
         console.log("Error getting available users");
@@ -351,8 +348,8 @@ async function getAllUsers() {
 	try {
 		const results = await database.query(getAllUsersSQL);
 		console.log("chats_getAllUsers_Successfully retrieved all users");
-		console.log("chats_getAllUsers_results[0]:")
-		console.log(results[0]);
+		// console.log("chats_getAllUsers_results[0]:")
+		// console.log(results[0]);
 		return results;
 	} catch (err) {
 		console.log("Error getting all users");

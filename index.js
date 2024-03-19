@@ -278,7 +278,7 @@ app.post('/createGroup', async (req, res) => {
 
 app.get('/room/:room_id', async (req,res) => {
     var room_id = req.params.room_id;
-    console.log("=-=-=-=-=-=-=-=-=-=-= START - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=")
+    // console.log("=-=-=-=-=-=-=-=-=-=-= START - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=")
     console.log("\n`app.get(\'\/room\/:id\')`: `room_id = req.params.room_id` = ", room_id)
     console.log("");
     var username = req.session.username;
@@ -289,15 +289,13 @@ app.get('/room/:room_id', async (req,res) => {
     await db_messages.updateMostRecentReadMessageID(username, room_id);
     const availableUsers = await db_chats.getAvailableUsers(room_id);
     const availableUsersResults = availableUsers[0];
-    console.log("app.get(\'\/room\/:id\'): availableUsersResults: ");
-    console.log(availableUsersResults);
+    // console.log("app.get(\'\/room\/:id\'): availableUsersResults: ");
+    // console.log(availableUsersResults);
     var messages = await db_messages.getMessagesForRoom({ room_id: room_id, username: username});
-    console.log("`app.get(\'\/room\/:id\')`: room results (from db_chats.getRoom): ")
-    console.log(roomDBResults);
     req.session_room_id = room.room_id;
     var room_user_id = await db_chats.getActiveRoomUserID({ room_id: room_id, username: username, user_id: req.session.user_id });
     req.session_room_user_id = room_user_id[0].room_user_id;
-    console.log("=-=-=-=-=-=-=-=-=-=-= END - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=\n")
+    // console.log("=-=-=-=-=-=-=-=-=-=-= END - app.get(\'\/room\/:id\') =-=-=-=-=-=-=-=-=-=-=\n")
     res.render('protectedRouteRoom.ejs', {
         "username": req.session.username,
         "chatroom": room,
