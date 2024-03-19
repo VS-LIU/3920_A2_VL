@@ -7,8 +7,8 @@ async function printMySQLVersion() {
 
 	try {
 		const results = await database.query(sqlQuery);
-		// console.log(`Successfully connected to MySQL [user: ${process.env.MYSQL_USER}, database: ${process.env.MYSQL_DATABASE}]`);
-		console.log(`Successfully connected to MySQL [user: ${process.env.MYSQL_USER_LOCAL}, database: ${process.env.MYSQL_DATABASE_LOCAL}]`);
+		console.log(`Successfully connected to MySQL [user: ${process.env.MYSQL_USER}, database: ${process.env.MYSQL_DATABASE}]`);
+		// console.log(`Successfully connected to MySQL [user: ${process.env.MYSQL_USER_LOCAL}, database: ${process.env.MYSQL_DATABASE_LOCAL}]`);
 		console.log(results[0]);
 		return true;
 	}
